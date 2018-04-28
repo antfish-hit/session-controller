@@ -21,7 +21,7 @@ public class SendSessionTest {
 
     @Before
     public void init(){
-        url = "http://localhost:8080/test";
+        url = "http://localhost:8080/nbi/deliverysession";
 
         sessions = new ArrayList<>(SIZE);
         for(int i = 0; i < SIZE; i++){

@@ -133,6 +133,7 @@ public class SendSessionUtil {
      */
     private static void sendSession(DeliverySessionCreationType session, Class<?> clazz, String url)throws JAXBException, IOException{
         String data = BeanToXml.convertToXml(session, clazz);
+        url = new StringBuffer(url).append("?id=").append(session.getId()).toString();
         httpClientSend(data, url, "text/xml;charset=utf-8");
     }
 

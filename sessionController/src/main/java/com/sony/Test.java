@@ -21,10 +21,10 @@ public class Test {
     public static void main(String[] args)throws JAXBException, IOException{
         List<DeliverySessionCreationType> list = new ArrayList<>(100);
         for(int i = 0; i < 10; i++){
-            list.add(new DeliverySessionCreationType(("test-version" + i), 1L, i % 2 == 0 ? ActionType.START : ActionType.STOP,0,i*100));
+            list.add(new DeliverySessionCreationType(("test-version" + i), (long)(Math.random() + i + 1)* 10000, i % 2 == 0 ? ActionType.START : ActionType.STOP,0,i*100));
         }
 
-        SendSessionUtil.sendSession(list, DeliverySessionCreationType.class,"http://localhost:8080/test");
+        SendSessionUtil.sendSession(list, DeliverySessionCreationType.class,"http://localhost:8080/nbi/deliverysession");
         System.out.println("=============================end====================================");
         System.out.println("=============================end====================================");
         System.out.println("=============================end====================================");
