@@ -14,4 +14,4 @@ session在程序中以java bean DeliverySessionCreationType的形式存储，借
 
 UT方面，只覆盖了client的两个工具类BeanToXml与SendSessionUtil的可调用方法，详见sessionController下的test包。
 以下是类图：
-![Alt text](https://github.com/wangyuanjiet/session-controller/master/Screenshots/uml.png)
+!(https://github.com/wangyuanjiet/session-controller/tree/master/Screenshots/uml.png)
