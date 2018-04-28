@@ -17,4 +17,5 @@ UT方面，只覆盖了client的两个工具类BeanToXml与SendSessionUtil的可
 ![类图](https://github.com/wangyuanjiet/session-controller/raw/master/Screenshots/uml.png)
 
 以下是流程图：
+
 ![流程图](https://github.com/wangyuanjiet/session-controller/raw/master/Screenshots/flow.png)
