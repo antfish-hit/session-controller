@@ -12,4 +12,6 @@ session在程序中以java bean DeliverySessionCreationType的形式存储，借
 
 整个项目以maven进行管理，session为父模块，整合整个项目，sessionController为client端，server为服务器端。server端使用springboot快速构建简易的服务。
 
-UT方面，只覆盖了client的两个工具类BeanToXml与SendSessionUtil的可调用方法，详见sessionController下的test包
+UT方面，只覆盖了client的两个工具类BeanToXml与SendSessionUtil的可调用方法，详见sessionController下的test包。
+以下是类图：
+![Alt text](https://github.com/wangyuanjiet/session-controller/master/Screenshots/uml.png)
