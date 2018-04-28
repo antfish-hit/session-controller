@@ -32,6 +32,14 @@ public class BeanToXml {
         return writer.toString();
     }
 
+    /**
+     * 将xml字符串转换为带有注解的bean
+     *
+     * @param xml
+     * @param className
+     * @return
+     * @throws JAXBException
+     */
     public static Object convertToObject(String xml, Class<?> className)throws JAXBException{
         JAXBContext context = JAXBContext.newInstance(className);
         Unmarshaller marshaller = context.createUnmarshaller();

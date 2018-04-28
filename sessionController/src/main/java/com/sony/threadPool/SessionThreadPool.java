@@ -3,6 +3,8 @@ package com.sony.threadPool;
 import java.util.concurrent.*;
 
 /**
+ * 线程池获取类
+ *
  * @author wyj
  * @date 4/27/2018
  */
@@ -30,6 +32,11 @@ public class SessionThreadPool {
         }
     }
 
+    /**
+     * 获取执行普通任务的线程池
+     *
+     * @return
+     */
     public ThreadPoolExecutor getSendStartSessionThreadPool(){
         synchronized (SessionThreadPool.class){
             if (this.sessionStartThreadPool == null){

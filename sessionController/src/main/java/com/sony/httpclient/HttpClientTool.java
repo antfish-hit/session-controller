@@ -30,6 +30,8 @@ import java.net.UnknownHostException;
 import java.util.Date;
 
 /**
+ * httpClient连接工具
+ *
  * @author wyj
  * @date 4/27/2018
  */
@@ -37,10 +39,8 @@ public class HttpClientTool {
     //记录日志
     private static final Logger logger = LoggerFactory.getLogger(HttpClientTool.class);
 
-    // org.apache.http.impl.client.CloseableHttpClient
     private static CloseableHttpClient httpclient = null;
 
-    // 这里就直接默认固定了,因为以下三个参数在新建的method中仍然可以重新配置并被覆盖.
     // ms毫秒,从池中获取链接超时时间
     static final int connectionRequestTimeout = 5000;
     // ms毫秒,建立链接超时时间
@@ -48,22 +48,16 @@ public class HttpClientTool {
     // ms毫秒,读取超时时间
     static final int socketTimeout = 30000;
 
-    // 总配置,主要涉及是以下两个参数,如果要作调整没有用到properties会比较后麻烦,但鉴于一经粘贴,随处可用的特点,就不再做依赖性配置化处理了.
-    // 而且这个参数同一家公司基本不会变动.
-    // 最大总并发,很重要的参数
+    // 最大总并发
     static final int maxTotal = 500;
-    // 每路并发,很重要的参数
+    // 每路并发
     static final int maxPerRoute = 100;
 
-    // 正常情况这里应该配成MAP或LIST
-    // 细化配置参数,用来对每路参数做精细化处理,可以管控各ip的流量,比如默认配置请求baidu:80端口最大100个并发链接,
-    // 每个细化配置之ip(不重要,在特殊场景很有用)
-    static final String detailHostName = "http://www.baidu.com";
-    // 每个细化配置之port(不重要,在特殊场景很有用)
-    static final int detailPort = 80;
-    // 每个细化配置之最大并发数(不重要,在特殊场景很有用)
-    static final int detailMaxPerRoute = 100;
-
+    /**
+     * 获取httpClient连接
+     *
+     * @return
+     */
     public static CloseableHttpClient getHttpClient() {
         if (null == httpclient) {
             synchronized (HttpClientTool.class) {
@@ -76,8 +70,7 @@ public class HttpClientTool {
     }
 
     /**
-     * 链接池初始化 这里最重要的一点理解就是. 让CloseableHttpClient 一直活在池的世界里, 但是HttpPost却一直用完就消掉.
-     * 这样可以让链接一直保持着.
+     * 链接池初始化
      *
      * @return
      */
@@ -94,17 +87,6 @@ public class HttpClientTool {
         // 将每个路由基础的连接增加
         cm.setDefaultMaxPerRoute(maxPerRoute);
 
-        // 细化配置开始,其实这里用Map或List的for循环来配置每个链接,在特殊场景很有用.
-        // 将每个路由基础的连接做特殊化配置,一般用不着
-        HttpHost httpHost = new HttpHost(detailHostName, detailPort);
-        // 将目标主机的最大连接数增加
-        cm.setMaxPerRoute(new HttpRoute(httpHost), detailMaxPerRoute);
-        // cm.setMaxPerRoute(new HttpRoute(httpHost2),
-        // detailMaxPerRoute2);//可以有细化配置2
-        // cm.setMaxPerRoute(new HttpRoute(httpHost3),
-        // detailMaxPerRoute3);//可以有细化配置3
-        // 细化配置结束
-
         // 请求重试处理
         HttpRequestRetryHandler httpRequestRetryHandler = new HttpRequestRetryHandler() {
             @Override
@@ -119,36 +101,42 @@ public class HttpClientTool {
                 if (exception instanceof NoHttpResponseException) {
                     logger.error("connect date: " + new Date());
                     logger.error("there is no response from server");
+                    logger.error(exception.toString() + " : " + exception.getCause().getMessage());
                     return true;
                 }
                 // 不要重试SSL握手异常
                 if (exception instanceof SSLHandshakeException) {
                     logger.error("connect date: " + new Date());
                     logger.error("SSL connection error");
+                    logger.error(exception.toString() + " : " + exception.getCause().getMessage());
                     return false;
                 }
                 // 超时
                 if (exception instanceof InterruptedIOException) {
                     logger.error("connect date: " + new Date());
                     logger.error("connection timeout");
+                    logger.error(exception.toString() + " : " + exception.getCause().getMessage());
                     return false;
                 }
                 // 目标服务器不可达
                 if (exception instanceof UnknownHostException) {
                     logger.error("connect date: " + new Date());
                     logger.error("unknown host");
+                    logger.error(exception.toString() + " : " + exception.getCause().getMessage());
                     return false;
                 }
                 // 连接被拒绝
                 if (exception instanceof ConnectTimeoutException) {
                     logger.error("connect date: " + new Date());
                     logger.error("connection is rejected");
+                    logger.error(exception.toString() + " : " + exception.getCause().getMessage());
                     return false;
                 }
                 // SSL握手异常
                 if (exception instanceof SSLException) {
                     logger.error("connect date: " + new Date());
                     logger.error("SSL connection error");
+                    logger.error(exception.toString() + " : " + exception.getCause().getMessage());
                     return false;
                 }
 

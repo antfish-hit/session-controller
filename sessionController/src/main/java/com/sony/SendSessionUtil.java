@@ -6,6 +6,7 @@ import com.sony.session.DeliverySessionCreationType;
 import com.sony.threadPool.SessionThreadPool;
 import com.sony.xml.BeanToXml;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -31,14 +32,20 @@ public class SendSessionUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SendSessionUtil.class);
 
+    /**
+     * 定时任务线程池
+     */
     private static final ScheduledExecutorService timer = SessionThreadPool.instance.getSendStopSessionThreadPool();
 
+    /**
+     * 普通任务线程池
+     */
     private static final ThreadPoolExecutor sessionPool = SessionThreadPool.instance.getSendStartSessionThreadPool();
 
     private SendSessionUtil(){}
 
     /**
-     * 批量发送session start bean并以定时方式发送session stop bean
+     * 批量发送session bean转xml字符串至服务器
      *
      * @param sessions
      * @param clazz
@@ -53,23 +60,33 @@ public class SendSessionUtil {
                         }catch (JAXBException e){
                             logger.error("date: " + new Date());
                             logger.error("transfer bean to xml error.");
-                            logger.error(e.getMessage());
+                            logger.error(e.toString() + " : " + e.getCause().getMessage());
                         }catch (IOException e){
                             logger.error("date: " + new Date());
                             logger.error("send data error.");
-                            logger.error(e.getMessage());
+                            logger.error(e.toString() + " : " + e.getCause().getMessage());
                         }
                     });
                 }
         );
-
     }
 
+    /**
+     * 根据action type将session分开执行
+     *
+     * @param session
+     * @param clazz
+     * @param url
+     * @throws JAXBException
+     * @throws IOException
+     */
     private static void divideSession(DeliverySessionCreationType session, Class<?> clazz, String url)throws JAXBException, IOException {
         switch (session.getAction()){
             case START:
                 sendSession(session,clazz, url);
+                //发送完毕后将action type转为stop
                 session.setAction(ActionType.STOP);
+                //并加入定时任务
                 doSchedule(session,clazz, url);
                 break;
             case STOP:
@@ -82,6 +99,13 @@ public class SendSessionUtil {
         }
     }
 
+    /**
+     * 发送action type为stop的定时任务
+     *
+     * @param session
+     * @param clazz
+     * @param url
+     */
     private static void doSchedule(DeliverySessionCreationType session, Class<?> clazz, String url){
         timer.schedule(() -> {
             try {
@@ -89,11 +113,11 @@ public class SendSessionUtil {
             } catch (JAXBException e) {
                 logger.error("date: " + new Date());
                 logger.error("transfer bean to xml error.");
-                logger.error(e.getMessage());
+                logger.error(e.toString() + " : " + e.getCause().getMessage());
             } catch (IOException e) {
                 logger.error("date: " + new Date());
                 logger.error("send data error.");
-                logger.error(e.getMessage());
+                logger.error(e.toString() + " : " + e.getCause().getMessage());
             }
         },(session.getStopTime() - session.getStartTime()), TimeUnit.MILLISECONDS);
     }
@@ -112,6 +136,14 @@ public class SendSessionUtil {
         httpClientSend(data, url, "text/xml;charset=utf-8");
     }
 
+    /**
+     * 使用httpClient发送数据值服务
+     *
+     * @param data
+     * @param url
+     * @param contentType
+     * @throws IOException
+     */
     private static synchronized void httpClientSend(String data, String url, String contentType)throws IOException{
         //获得httpclient
         HttpClient client = HttpClientTool.getHttpClient();
@@ -140,7 +172,7 @@ public class SendSessionUtil {
         String responseEntity = reader.lines().collect(Collectors.joining());
         map.put("responseEntity",responseEntity);
 
-        if(response.getStatusLine().getStatusCode() == 200){
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
             map.put("result","success");
         }else{
             map.put("result","fail");
